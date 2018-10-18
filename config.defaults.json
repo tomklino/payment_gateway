@@ -1,0 +1,10 @@
+{
+  "listen-port": "3030",
+  "mysql": {
+    "connectionLimit": "10",
+    "host": "10.0.0.1",
+    "user": "root",
+    "database": "payment_gateway",
+    "password": "1q2w3e4r"
+  }
+}

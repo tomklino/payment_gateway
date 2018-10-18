@@ -1,0 +1,3 @@
+node_modules/*
+secret_settings.json
+config.json

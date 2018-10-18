@@ -1,0 +1,16 @@
+{
+  "name": "payment-gateway",
+  "version": "0.1.0",
+  "description": "creates virtual accounts that link to external or internal account with monetary value",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Tom Klinovsky",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.16.4",
+    "mysql2": "^1.6.1",
+    "nconf": "^0.10.0"
+  }
+}
