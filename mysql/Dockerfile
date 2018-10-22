@@ -1,5 +1,7 @@
 FROM mysql:5.7.22
 
-ENV MYSQL_DATABASE="payment_gateway"
+ARG dbname
 
-ADD payment_gateway_db.sql /docker-entrypoint-initdb.d/payment_gateway_db.sql
+ENV MYSQL_DATABASE=$dbname
+
+ADD schema.sql /docker-entrypoint-initdb.d/schema.sql

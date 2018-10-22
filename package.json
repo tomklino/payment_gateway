@@ -4,7 +4,8 @@
   "description": "creates virtual accounts that link to external or internal account with monetary value",
   "main": "app.js",
   "scripts": {
-    "test": "node_modules/.bin/mocha tests"
+    "test": "node_modules/.bin/mocha tests",
+    "start": "node app.js"
   },
   "author": "Tom Klinovsky",
   "license": "ISC",

@@ -32,4 +32,4 @@ async function checkAndStartServer(port) {
   })
 }
 
-checkAndStartServer(config.get('listen-port'))
+checkAndStartServer(config.get('listen_port'))

@@ -1,24 +1,32 @@
 const chai = require('chai');
 const chaiHttp = require('chai-http');
-const cp = require("child_process")
-const path = require("path")
+const cp = require("child_process");
+const path = require("path");
+const fs = require("fs");
 
 const should = chai.should();
 const expect = chai.expect;
 
-chai.use(chaiHttp)
-// HACK: : should be read from settings, not hardcoded
-server = "http://localhost:3030"
+chai.use(chaiHttp);
 
 testing_db_file_location = path.join(__dirname, "data-for-testing.sql")
 mysql_conf_file = path.join(__dirname, "/mysql-testing.cnf")
+
+const config = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "config.json")));
+const port = config.listen_port || "3000";
+const server = "http://localhost:" + port;
+const mysql_hostname =
+  process.env['MYSQL_HOSTNAME'] || config.mysql.host || "127.0.0.1";
+const mysql_database =
+  process.env['MYSQL_DATABASE'] || config.mysql.database;
 
 function resetDB() {
   command =
     "mysql" +
     " --defaults-extra-file=" + mysql_conf_file +
-    " --host " + process.env['MYSQL_HOSTNAME'] +
-    " -D payment_gateway < " + testing_db_file_location;
+    " --host " + mysql_hostname +
+    " -D " + mysql_database +
+    " < " + testing_db_file_location;
   cp.execSync(command);
 }
 
