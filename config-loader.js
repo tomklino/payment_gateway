@@ -1,6 +1,9 @@
 const nconf = require('nconf');
 
-module.exports = function configLoader({ home_dir = __dirname }) {
+module.exports = function configLoader(options) {
+  options = options || {};
+  const { home_dir = __dirname } = options;
+  
   nconf
     .argv()
     .env('__')
