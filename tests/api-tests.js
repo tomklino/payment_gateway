@@ -46,7 +46,7 @@ describe("server health check", function() {
 describe("api tests", function() {
   this.timeout(9000) //resetting the state of the database might take long
   beforeEach(resetDB);
-  // after(resetDB);
+  after(resetDB);
 
   it("should create an account and return token", function(done) {
     chai.request(server)
@@ -115,6 +115,21 @@ describe("api tests", function() {
       })
       .catch((e) => {
         done(e);
+      })
+  })
+
+  it("should return the total of an account in USD", function(done) {
+    chai.request(server)
+      .get('/account_total/' + testData.existing_test_account)
+      .then((res) => {
+        expect(res).to.have.status(200)
+        let body = JSON.parse(res.text)
+        expect(body.value).to.be.a('number');
+        expect(body.currency_symbol).to.be.a('string');
+        done();
+      })
+      .catch((err) => {
+        done(err);
       })
   })
 })

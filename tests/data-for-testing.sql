@@ -1,3 +1,9 @@
+-- MySQL dump 10.13  Distrib 5.7.22, for Linux (x86_64)
+--
+-- Host: 172.17.0.2    Database: payment-gateway
+-- ------------------------------------------------------
+-- Server version	5.7.22
+
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
@@ -22,7 +28,7 @@ CREATE TABLE `Account_Links` (
   `link_data` varchar(4096) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
   KEY `account_id` (`account_id`),
   CONSTRAINT `Account_Links_ibfk_1` FOREIGN KEY (`account_id`) REFERENCES `Accounts` (`account_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -31,6 +37,7 @@ CREATE TABLE `Account_Links` (
 
 LOCK TABLES `Account_Links` WRITE;
 /*!40000 ALTER TABLE `Account_Links` DISABLE KEYS */;
+INSERT INTO `Account_Links` VALUES (1,'coupon','63c335297c31758c7361965c32fe72a36a84db334282bf7dc790fbfe067f55ff'),(1,'coupon','5c1f6dfe0cc65cc58b746a8b4ff16568fef064391118331c63492d0f55992aa6'),(1,'coupon','090a76bc62c6a80732c0c2859a683eeaf37f150f1a9d5262cc167a78a60f7c1f'),(1,'coupon','df46290ec5e725e8f52077ece3c543b0b7d81bc90d5b751e2785abf39cd2b942');
 /*!40000 ALTER TABLE `Account_Links` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -84,6 +91,7 @@ CREATE TABLE `Coupons` (
 
 LOCK TABLES `Coupons` WRITE;
 /*!40000 ALTER TABLE `Coupons` DISABLE KEYS */;
+INSERT INTO `Coupons` VALUES ('090a76bc62c6a80732c0c2859a683eeaf37f150f1a9d5262cc167a78a60f7c1f',25,'USD'),('5c1f6dfe0cc65cc58b746a8b4ff16568fef064391118331c63492d0f55992aa6',10,'USD'),('63c335297c31758c7361965c32fe72a36a84db334282bf7dc790fbfe067f55ff',10,'USD'),('df46290ec5e725e8f52077ece3c543b0b7d81bc90d5b751e2785abf39cd2b942',3,'USD');
 /*!40000 ALTER TABLE `Coupons` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -95,3 +103,5 @@ UNLOCK TABLES;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2018-10-24  1:41:06
