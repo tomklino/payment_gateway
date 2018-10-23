@@ -55,8 +55,8 @@ describe("api tests", function() {
       .then((res) => {
         expect(res).to.have.status(200)
         let body = JSON.parse(res.text)
-        expect(body.token).to.be.a('string')
-        expect(body.token.length).to.equal(128)
+        expect(body.account_token).to.be.a('string')
+        expect(body.account_token.length).to.equal(128)
         done()
       }).catch((err) => {
         done(err)
@@ -100,4 +100,21 @@ describe("api tests", function() {
         done(err)
       })
   })
+
+  // it("should create a coupon and link it to an account", function(done) {
+  //   chai.request(server)
+  //     .post('/add_coupon')
+  //     .send({
+  //       destination_account: testData.existing_test_account,
+  //       value: 10,
+  //       currency_symbol: "USD"
+  //     })
+  //     .then((res) => {
+  //       expect(res).to.have.status(200);
+  //       done();
+  //     })
+  //     .catch((e) => {
+  //       done(e);
+  //     })
+  // })
 })
