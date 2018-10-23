@@ -101,20 +101,20 @@ describe("api tests", function() {
       })
   })
 
-  // it("should create a coupon and link it to an account", function(done) {
-  //   chai.request(server)
-  //     .post('/add_coupon')
-  //     .send({
-  //       destination_account: testData.existing_test_account,
-  //       value: 10,
-  //       currency_symbol: "USD"
-  //     })
-  //     .then((res) => {
-  //       expect(res).to.have.status(200);
-  //       done();
-  //     })
-  //     .catch((e) => {
-  //       done(e);
-  //     })
-  // })
+  it("should create a coupon and link it to an account", function(done) {
+    chai.request(server)
+      .post('/add_coupon')
+      .send({
+        destination_account: testData.existing_test_account,
+        value: 10,
+        currency_symbol: "USD"
+      })
+      .then((res) => {
+        expect(res).to.have.status(200);
+        done();
+      })
+      .catch((e) => {
+        done(e);
+      })
+  })
 })

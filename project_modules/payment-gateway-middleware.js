@@ -5,14 +5,18 @@ const cryptoRandomString = require('crypto-random-string');
 const CREATE_ACCOUNT_STATEMENT =
   'INSERT INTO `Accounts` (`account_token`, `account_name`) VALUES (?, ?)'
 const QUERY_ACCOUNT_BY_TOKEN =
-  'SELECT `account_name` FROM `Accounts` WHERE `account_token` = ?'
+  'SELECT `account_id`, `account_token`, `account_name` FROM `Accounts` WHERE `account_token` = ?'
 const CREATE_COUPON_STATEMENT =
   'INSERT INTO `Coupons` (`coupon_id`, `value`, `currency_symbol`) VALUES (?, ?, ?)'
+const CREATE_ACCOUNT_LINK_STATEMENT =
+  'INSERT INTO `Account_Links` (`account_id`, `link_type`, `link_data`) VALUES (?, ?, ?)'
 
 const ERROR_MESSAGES = {
   ACCOUNT_NOT_FOUND: "account not found",
   ACCOUNT_TOKEN_NOT_VALID: "account token not valid",
-  ACCOUNT_NAME_NOT_PROVIDED: "account name not provided"
+  ACCOUNT_NAME_NOT_PROVIDED: "account name not provided",
+  PROVIDED_VALUE_IS_NOT_A_NUMBER: "provided value is not a number",
+  INVALID_CURRENCY_SYMBOL: "invalid currency symbol"
 }
 
 module.exports = function({ mysqlConnectionPool }) {
@@ -38,12 +42,56 @@ module.exports = function({ mysqlConnectionPool }) {
     res.end(JSON.stringify({ account_name: account.account_name }))
   })
 
-  router.post('/add_coupon', function(req, res, next) {
-    //TODO only admins should be able to add coupons without a source with enough funds
+  //TODO only admins should be able to add coupons without a source with enough funds
+  router.post('/add_coupon', async function(req, res, next) {
+    let args = { ...req.body, ...req.params };
+    let [ err, account ] = await addCoupon(mysqlConnectionPool, args);
+    if(err) {
+      handleError(err, res);
+      return;
+    }
 
+    res.end(JSON.stringify( account ))
   })
 
   return router;
+}
+
+async function addCoupon( mysqlConnectionPool, args ) {
+  const { destination_account, value, currency_symbol } = args;
+
+  if(typeof value !== "number") {
+    return [ new Error(ERROR_MESSAGES.PROVIDED_VALUE_IS_NOT_A_NUMBER) ];
+  }
+  if(typeof currency_symbol !== "string") {
+    return [ new Error(ERROR_MESSAGES.INVALID_CURRENCY_SYMBOL) ]
+  }
+  let [ err, account ] = await getAccount(mysqlConnectionPool, {
+    account_token: destination_account
+  });
+  if(err) {
+    return [ err ];
+  }
+
+  //TODO should be a transaction that can be rolled back
+  let coupon_id = generateCouponId();
+  try {
+    await mysqlConnectionPool.execute(CREATE_COUPON_STATEMENT, [
+      coupon_id, value, currency_symbol
+    ])
+  } catch(err) {
+    return [ err ]
+  }
+
+  try {
+    await mysqlConnectionPool.execute(CREATE_ACCOUNT_LINK_STATEMENT, [
+      account.account_id, "coupon", coupon_id
+    ])
+  } catch (err) {
+    return [ err ]
+  }
+
+  return [ null, account ];
 }
 
 async function createAccount( mysqlConnectionPool, args ) {
@@ -109,8 +157,12 @@ function handleError(err, res) {
 
 /* ----helpers---- */
 
+function generateCouponId() {
+  return cryptoRandomString(64);
+}
+
 function generateToken() {
-  return cryptoRandomString(128)
+  return cryptoRandomString(128);
 }
 
 function isAccountTokenValid(account_token) {
