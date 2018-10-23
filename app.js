@@ -1,5 +1,7 @@
 const express = require('express');
 const mysql = require('mysql2/promise');
+const bodyParser = require('body-parser');
+
 const configLoader = require('./config-loader.js')
 const payment_api = require('./project_modules/payment-gateway-middleware.js')
 
@@ -8,6 +10,9 @@ const config = configLoader({ home_dir: __dirname })
 const mysqlConnectionPool = mysql.createPool(config.get('mysql'))
 
 app = express();
+
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 
 app.get('/health', function(req, res) {
   res.end("healthy")

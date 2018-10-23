@@ -18,6 +18,12 @@ const server = "http://localhost:" + port;
 const mysql_hostname = config.get('mysql:host')
 const mysql_database = config.get('mysql:database')
 
+const testData = {
+  "none_existing_account": "a4331b4a31656821e5731ce31151202c00c706e2c316e8a0a04acd13086af59cf68d94bc22ea78c67c13692ac0b43aa8e409d420d18a5f0b0bf41456658f0e68",
+  "existing_test_account": "c72bc564d79446b88912d126bde382e71664addaeb48b5db43ffc87b09edd4e29c56d1933fb495457618614f7853b0189ed296387d674c8c3a4b70e8015ea19a"
+
+}
+
 function resetDB() {
   command =
     "mysql" +
@@ -38,20 +44,60 @@ describe("server health check", function() {
 })
 
 describe("api tests", function() {
+  this.timeout(9000) //resetting the state of the database might take long
   beforeEach(resetDB);
-  after(resetDB);
+  // after(resetDB);
 
   it("should create an account and return token", function(done) {
     chai.request(server)
-      .post('/create/test_account')
+      .post('/create')
+      .send({ account_name: "test_account_1"})
       .then((res) => {
         expect(res).to.have.status(200)
         let body = JSON.parse(res.text)
         expect(body.token).to.be.a('string')
         expect(body.token.length).to.equal(128)
         done()
-      }).catch((res) => {
-        done(res)
+      }).catch((err) => {
+        done(err)
+      })
+  })
+
+  it("should return a 400 status when trying to create an account with no name", function(done) {
+    chai.request(server)
+      .post('/create')
+      .then((res) => {
+        expect(res).to.have.status(400)
+        done();
+      })
+      .catch((err) => {
+        done(err)
+      })
+  })
+
+  it("should return a 404 when quering for a token that does not exist", function(done) {
+    chai.request(server)
+      .get('/account/' + testData.none_existing_account)
+      .then((res) => {
+        expect(res).to.have.status(404);
+        done();
+      })
+      .catch((err) => {
+        done(err);
+      })
+  })
+
+  it("should return an object containing the account name", function(done) {
+    chai.request(server)
+      .get('/account/' + testData.existing_test_account)
+      .then((res) => {
+        expect(res).to.have.status(200);
+        let body = JSON.parse(res.text)
+        expect(body.account_name).to.be.a('string')
+        done();
+      })
+      .catch((err) => {
+        done(err)
       })
   })
 })
