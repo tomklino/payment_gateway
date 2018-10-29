@@ -20,8 +20,9 @@ const mysql_database = config.get('mysql:database')
 
 const testData = {
   "none_existing_account": "a4331b4a31656821e5731ce31151202c00c706e2c316e8a0a04acd13086af59cf68d94bc22ea78c67c13692ac0b43aa8e409d420d18a5f0b0bf41456658f0e68",
-  "existing_test_account": "c72bc564d79446b88912d126bde382e71664addaeb48b5db43ffc87b09edd4e29c56d1933fb495457618614f7853b0189ed296387d674c8c3a4b70e8015ea19a"
-
+  "existing_test_account": "c72bc564d79446b88912d126bde382e71664addaeb48b5db43ffc87b09edd4e29c56d1933fb495457618614f7853b0189ed296387d674c8c3a4b70e8015ea19a",
+  "test_account_1":        "7439596a2ff91840b1469e0580be05a81d844c94e2b9b017d927dcbdbefe4bd9ec9873ab2ba6729922f77ffba2dd47eec864935fdc9fa71e1a9f7a28ed103de5",
+  "test_account_2":        "8eb17747ceefb5add442687c09dd0b537dcd71667cfa345c14676d86c58696f475ec44956ab204846d21f5dd9b669d53f9f941a45fbf36c8c10e19cf2157073d"
 }
 
 function resetDB() {
@@ -51,7 +52,7 @@ describe("api tests", function() {
   it("should create an account and return token", function(done) {
     chai.request(server)
       .post('/create')
-      .send({ account_name: "test_account_1"})
+      .send({ account_name: "test_account_x"})
       .then((res) => {
         expect(res).to.have.status(200)
         let body = JSON.parse(res.text)
@@ -131,5 +132,37 @@ describe("api tests", function() {
       .catch((err) => {
         done(err);
       })
+  })
+
+  //TODO create a more complex scenrio for the tests
+  // 1. transfer less than the value of the first coupon
+  // 2. transfer more than the value of the first coupon (with enough funds)
+  // 3. transfer with more than the available funds - and expect an error (403)
+  it("should transfer 10$ from source account to destination account", async function() {
+    var transfer_response =
+    await chai.request(server)
+      .post('/transfer')
+      .send({
+        source_account: testData.test_account_1,
+        destination_account: testData.test_account_2,
+        amount: 10,
+        amount_currency: "USD"
+      })
+
+    var total_src_account_response =
+    await chai.request(server)
+      .get('/account_total/' + testData.test_account_1)
+
+    let total_src_account_response_body = JSON.parse(total_src_account_response.text)
+
+    var total_dst_account_response =
+    await chai.request(server)
+      .get('/account_total/' + testData.test_account_2)
+
+    let total_dst_account_response_body = JSON.parse(total_dst_account_response.text)
+
+    expect(transfer_response).to.have.status(200)
+    expect(total_src_account_response_body.value).to.equal(0)
+    expect(total_dst_account_response_body.value).to.equal(10)
   })
 })

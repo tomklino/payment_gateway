@@ -16,6 +16,8 @@ const QUERY_ACCOUNT_LINKS =
   'WHERE `Accounts`.`account_id` = ?'
 const QUERY_COUPON_VALUE =
   'SELECT `value`, `currency_symbol` FROM `Coupons` WHERE `coupon_id` = ?'
+const UPDATE_COUPON_VALUE =
+  'UPDATE `Coupons` SET `value` = ? WHERE `coupon_id` = ?'
 
 const ERROR_MESSAGES = {
   ACCOUNT_NOT_FOUND: "account not found",
@@ -24,7 +26,8 @@ const ERROR_MESSAGES = {
   PROVIDED_VALUE_IS_NOT_A_NUMBER: "provided value is not a number",
   INVALID_CURRENCY_SYMBOL: "invalid currency symbol",
   INVALID_COUPON_ID: "invalid coupon id",
-  COUPON_NOT_FOUND: "coupon not found"
+  COUPON_NOT_FOUND: "coupon not found",
+  NOT_ENOUGH_FUNDS: "not enough funds"
 }
 
 module.exports = function({ mysqlConnectionPool }) {
@@ -74,7 +77,73 @@ module.exports = function({ mysqlConnectionPool }) {
     res.end(JSON.stringify(account_total))
   })
 
+  router.post('/transfer', async function(req, res, next) {
+    let args = { ...req.body, ...req.params };
+
+    let [ err, successful ] = await transfer(mysqlConnectionPool, args)
+    if(err) {
+      handleError(err, res)
+      return;
+    }
+
+    res.end()
+  })
+
   return router;
+}
+
+async function transfer( mysqlConnectionPool, args ) {
+  const { source_account, destination_account, amount, amount_currency } = args;
+
+  let [ err_on_total, source_account_balance ] =
+    await getAccountTotal(mysqlConnectionPool, { account_token: source_account })
+
+  if(err_on_total) {
+    return [ err_on_total ]
+  }
+
+  if(amount > source_account_balance) {
+    return [ new Error(ERROR_MESSAGES.NOT_ENOUGH_FUNDS) ]
+  }
+
+  let [ err_on_links , source_account_links ] =
+    await getAccountLinks(mysqlConnectionPool, { account_token: source_account })
+
+  if(err_on_links) {
+    return [ err_on_links ]
+  }
+
+  //// NOTE: ONLY COUPONS ARE VALID FOR TRANSFER
+  let source_account_coupon_ids =
+    source_account_links
+    .filter(link => link.link_type === "coupon")
+    .map(link => link.link_data)
+
+  let removed_funds = 0;
+  let coupons_to_update = []
+  while(removed_funds < amount) {
+    let remaining = amount - removed_funds;
+    let coupon_id = source_account_coupon_ids.pop()
+    let coupon_value = await getCouponValue(mysqlConnectionPool, { coupon_id })
+    let coupon_transfer = Math.min(coupon_value, remaining)
+    removed_funds = removed_funds + coupon_transfer
+    coupons_to_update.push({
+      coupon_id, updated_value: coupon_value - coupon_transfer
+    })
+  }
+
+  //TODO in map - as TRANSACTION
+  await Promise.all(coupons_to_update.map((update) => {
+    mysqlConnectionPool.execute(UPDATE_COUPON_VALUE, [
+      update.updated_value, update.coupon_id
+    ])
+  }))
+
+  await addCoupon(mysqlConnectionPool, {
+    destination_account, value: amount, currency_symbol: amount_currency
+  })
+
+  return [ null, true ];
 }
 
 async function getAccountTotal( mysqlConnectionPool, args ) {
@@ -235,6 +304,10 @@ async function getAccount(mysqlConnectionPool, args) {
 function handleError(err, res) {
   debug(1, "handleError:", err.message)
   switch (err.message) {
+    case ERROR_MESSAGES.NOT_ENOUGH_FUNDS: {
+      res.status(403).end("not enough funds for transfer");
+      return;
+    }
     case ERROR_MESSAGES.ACCOUNT_NOT_FOUND: {
       res.status(404).end("account not found")
       return;
