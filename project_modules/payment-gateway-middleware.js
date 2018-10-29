@@ -124,14 +124,17 @@ async function transfer( mysqlConnectionPool, args ) {
   while(removed_funds < amount) {
     let remaining = amount - removed_funds;
     let coupon_id = source_account_coupon_ids.pop()
-    let coupon_value = await getCouponValue(mysqlConnectionPool, { coupon_id })
+    let [ err, { value: coupon_value } ] =
+      await getCouponValue(mysqlConnectionPool, { coupon_id })
     let coupon_transfer = Math.min(coupon_value, remaining)
     removed_funds = removed_funds + coupon_transfer
+
     coupons_to_update.push({
       coupon_id, updated_value: coupon_value - coupon_transfer
     })
   }
 
+  debug(1, "transfer", "coupons_to_update", coupons_to_update)
   //TODO in map - as TRANSACTION
   await Promise.all(coupons_to_update.map((update) => {
     mysqlConnectionPool.execute(UPDATE_COUPON_VALUE, [

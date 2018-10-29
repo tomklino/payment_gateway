@@ -135,9 +135,8 @@ describe("api tests", function() {
   })
 
   //TODO create a more complex scenrio for the tests
-  // 1. transfer less than the value of the first coupon
-  // 2. transfer more than the value of the first coupon (with enough funds)
-  // 3. transfer with more than the available funds - and expect an error (403)
+  // 1. transfer more than the value of the first coupon (with enough funds)
+  // 2. transfer with more than the available funds - and expect an error (403)
   it("should transfer 10$ from source account to destination account", async function() {
     var transfer_response =
     await chai.request(server)
@@ -164,5 +163,33 @@ describe("api tests", function() {
     expect(transfer_response).to.have.status(200)
     expect(total_src_account_response_body.value).to.equal(0)
     expect(total_dst_account_response_body.value).to.equal(10)
+  })
+
+  it("should transfer 5$ from source account to destination account", async function() {
+    var transfer_response =
+    await chai.request(server)
+      .post('/transfer')
+      .send({
+        source_account: testData.test_account_1,
+        destination_account: testData.test_account_2,
+        amount: 5,
+        amount_currency: "USD"
+      })
+
+    var total_src_account_response =
+    await chai.request(server)
+      .get('/account_total/' + testData.test_account_1)
+
+    let total_src_account_response_body = JSON.parse(total_src_account_response.text)
+
+    var total_dst_account_response =
+    await chai.request(server)
+      .get('/account_total/' + testData.test_account_2)
+
+    let total_dst_account_response_body = JSON.parse(total_dst_account_response.text)
+
+    expect(transfer_response).to.have.status(200)
+    expect(total_src_account_response_body.value).to.equal(5)
+    expect(total_dst_account_response_body.value).to.equal(5)
   })
 })
