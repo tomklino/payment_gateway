@@ -4,7 +4,7 @@
     "connectionLimit": "10",
     "host": "10.0.0.1",
     "user": "root",
-    "database": "payment_gateway",
+    "database": "payment-gateway",
     "password": "1q2w3e4r"
   }
 }
