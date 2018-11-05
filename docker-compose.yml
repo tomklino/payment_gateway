@@ -1,0 +1,15 @@
+version: '3.0'
+services:
+  mysql:
+    environment:
+      - MYSQL_ROOT_PASSWORD=1q2w3e4r
+    image: "payment-gateway_db"
+  app:
+    image: "payment-gateway"
+    environment:
+      - mysql__host=mysql
+      - mysql__password=1q2w3e4r
+    volumes:
+      - ./docker-entry-scripts:/entrypoint.d
+    ports:
+      - "3030:3030"
