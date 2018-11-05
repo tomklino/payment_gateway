@@ -23,6 +23,7 @@ const ERROR_MESSAGES = {
   ACCOUNT_NOT_FOUND: "account not found",
   ACCOUNT_TOKEN_NOT_VALID: "account token not valid",
   ACCOUNT_NAME_NOT_PROVIDED: "account name not provided",
+  ACCOUNT_NAME_TAKEN: "the account name is already taken",
   PROVIDED_VALUE_IS_NOT_A_NUMBER: "provided value is not a number",
   INVALID_CURRENCY_SYMBOL: "invalid currency symbol",
   INVALID_COUPON_ID: "invalid coupon id",
@@ -95,6 +96,7 @@ module.exports = function({ mysqlConnectionPool }) {
 async function transfer( mysqlConnectionPool, args ) {
   const { source_account, destination_account, amount, amount_currency } = args;
 
+  //FIXME: transfer works only on coupons, so check only coupons total
   let [ err_on_total, source_account_balance ] =
     await getAccountTotal(mysqlConnectionPool, { account_token: source_account })
 
@@ -276,8 +278,11 @@ async function createAccount( mysqlConnectionPool, args ) {
       account_token, account_name
     ])
     return [ null, { account_token, account_name } ];
-  } catch(e) {
-    return [ e ];
+  } catch(err) {
+    if(err.code === "ER_DUP_ENTRY") {
+      return [ new Error(ERROR_MESSAGES.ACCOUNT_NAME_TAKEN) ]
+    }
+    return [ err ];
   }
 }
 
@@ -321,6 +326,11 @@ function handleError(err, res) {
     }
     case ERROR_MESSAGES.ACCOUNT_NAME_NOT_PROVIDED: {
       res.status(400).end("account name not provided")
+      return;
+    }
+    case ERROR_MESSAGES.ACCOUNT_NAME_TAKEN: {
+      res.status(400).end("account name taken. use another one")
+      return;
     }
     default: {
       res.status(500).end("Internal server error")
