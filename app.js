@@ -35,6 +35,13 @@ async function checkAndStartServer(port) {
   app.listen(port, () => {
     console.log(`server started, listening on port ${port}`)
   })
+  process.on('SIGTERM', tearDown)
+  process.on('SIGINT', tearDown)
+}
+
+function tearDown() {
+  mysqlConnectionPool.end();
+  process.exit(0)
 }
 
 checkAndStartServer(config.get('listen_port'))
