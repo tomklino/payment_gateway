@@ -2,6 +2,8 @@ const chai = require('chai');
 const chaiHttp = require('chai-http');
 const cp = require("child_process");
 const path = require("path");
+const mysql = require('mysql2/promise');
+const fs = require('fs');
 
 const should = chai.should();
 const expect = chai.expect;
@@ -10,13 +12,20 @@ chai.use(chaiHttp);
 
 testing_db_file_location = path.join(__dirname, "data-for-testing.sql")
 mysql_conf_file = path.join(__dirname, "/mysql-testing.cnf")
+mysql_data_for_testing = fs.readFileSync(testing_db_file_location, 'utf8')
 
 const config = require('../config-loader.js')()
 
 const port = config.get('listen_port')
-const server = "http://localhost:" + port;
-const mysql_hostname = config.get('mysql:host')
-const mysql_database = config.get('mysql:database')
+const server = "http://app:" + port;
+
+const mysql_connect_arguments = {
+  host: config.get('mysql:host'),
+  user: config.get('mysql:user'),
+  database: config.get('mysql:database'),
+  password: config.get('mysql:password'),
+  multipleStatements: true
+}
 
 const testData = {
   "none_existing_account": "a4331b4a31656821e5731ce31151202c00c706e2c316e8a0a04acd13086af59cf68d94bc22ea78c67c13692ac0b43aa8e409d420d18a5f0b0bf41456658f0e68",
@@ -25,14 +34,10 @@ const testData = {
   "test_account_2":        "8eb17747ceefb5add442687c09dd0b537dcd71667cfa345c14676d86c58696f475ec44956ab204846d21f5dd9b669d53f9f941a45fbf36c8c10e19cf2157073d"
 }
 
-function resetDB() {
-  command =
-    "mysql" +
-    " --defaults-extra-file=" + mysql_conf_file +
-    " --host " + mysql_hostname +
-    " -D " + mysql_database +
-    " < " + testing_db_file_location;
-  cp.execSync(command);
+async function resetDB() {
+  const connection = await mysql.createConnection(mysql_connect_arguments);
+  await connection.query(mysql_data_for_testing);
+  await connection.end();
 }
 
 describe("server health check", function() {

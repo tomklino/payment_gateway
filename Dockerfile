@@ -14,3 +14,5 @@ COPY docker-init.sh /
 WORKDIR /opt/app
 
 ENTRYPOINT [ "/docker-init.sh" ]
+
+CMD [ "node", "app" ]

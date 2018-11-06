@@ -8,4 +8,4 @@ done;
 
 echo "entry scripts done, running app..."
 
-node app $@
+exec $@

@@ -1,15 +1,28 @@
 version: '3.0'
 services:
   mysql:
+    image: "payment-gateway_db"
+    logging:
+      driver: "none"
     environment:
       - MYSQL_ROOT_PASSWORD=1q2w3e4r
-    image: "payment-gateway_db"
   app:
     image: "payment-gateway"
     environment:
       - mysql__host=mysql
       - mysql__password=1q2w3e4r
     volumes:
-      - ./docker-entry-scripts:/entrypoint.d
+      - ./docker-entry-scripts/app:/entrypoint.d
     ports:
       - "3030:3030"
+  test:
+    image: "mhart/alpine-node:11"
+    environment:
+      - mysql__host=mysql
+    volumes:
+      - ./:/code
+      - ./docker-entry-scripts/test:/entrypoint.d
+    working_dir: "/code"
+    command: "/bin/sh"
+    entrypoint: "./docker-init.sh"
+    command: "npm test"

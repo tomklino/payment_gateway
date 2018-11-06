@@ -5,6 +5,8 @@
   "main": "app.js",
   "scripts": {
     "test": "node_modules/.bin/mocha tests",
+    "testAll": "sudo docker-compose up --exit-code-from test",
+    "cleanTestEnv": "sudo docker-compose down",
     "start": "node app.js"
   },
   "author": "Tom Klinovsky",
