@@ -7,4 +7,4 @@ until nc -w1 app 3030; do
   sleep 1
 done
 
->&2 echo "mysql is up"
+>&2 echo "app is up"
