@@ -6,6 +6,7 @@
   "scripts": {
     "test": "node_modules/.bin/mocha tests",
     "testAll": "sudo docker-compose up --exit-code-from test",
+    "build": "sudo docker build -t payment-gateway .",
     "cleanTestEnv": "sudo docker-compose down",
     "start": "node app.js"
   },
