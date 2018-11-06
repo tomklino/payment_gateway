@@ -17,7 +17,8 @@ mysql_data_for_testing = fs.readFileSync(testing_db_file_location, 'utf8')
 const config = require('../config-loader.js')()
 
 const port = config.get('listen_port')
-const server = "http://app:" + port;
+const address = config.get('listen_address')
+const server = `http://${address}:${port}`;
 
 const mysql_connect_arguments = {
   host: config.get('mysql:host'),

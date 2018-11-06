@@ -1,5 +1,6 @@
 {
   "listen_port": "3030",
+  "listen_address": "127.0.0.1",
   "mysql": {
     "connectionLimit": "10",
     "host": "10.0.0.1",

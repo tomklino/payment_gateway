@@ -19,6 +19,7 @@ services:
     image: "mhart/alpine-node:11"
     environment:
       - mysql__host=mysql
+      - listen_address=app
     volumes:
       - ./:/code
       - ./docker-entry-scripts/test:/entrypoint.d
