@@ -1,13 +1,13 @@
 version: '3.0'
 services:
   mysql:
-    image: "payment-gateway_db"
+    image: "gcr.io/payment-gateway-221815/payment-gateway_db"
     logging:
       driver: "none"
     environment:
       - MYSQL_ROOT_PASSWORD=1q2w3e4r
   app:
-    image: "payment-gateway"
+    image: "gcr.io/payment-gateway-221815/payment-gateway"
     environment:
       - mysql__host=mysql
       - mysql__password=1q2w3e4r

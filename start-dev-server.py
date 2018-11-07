@@ -5,7 +5,7 @@ from subprocess import call, check_output
 base_dir = os.path.dirname(os.path.abspath(__file__))
 
 conf_file_location = os.path.join(base_dir, "config.json")
-rebuild_docker_script = os.path.join(base_dir, "mysql", "rebuild-docker.py")
+rebuild_docker_script = os.path.join(base_dir, "mysql", "build-mysql-docker.py")
 dev_server_cleanup_script = os.path.join(base_dir, "dev-server-cleanup.py")
 wait_for_connection_script = os.path.join(base_dir, "wait-for-connection.py")
 
