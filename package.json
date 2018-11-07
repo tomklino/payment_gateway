@@ -7,6 +7,7 @@
     "test": "node_modules/.bin/mocha --exit tests",
     "testAll": "sudo docker-compose up --exit-code-from test",
     "build": "sudo docker build -t payment-gateway .",
+    "googleBuild": "gcloud builds submit --config cloudbuild.yml .",
     "cleanTestEnv": "sudo docker-compose down",
     "start": "node app.js"
   },
